@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        finance: {
+          income: "hsl(var(--finance-income))",
+          "income-foreground": "hsl(var(--finance-income-foreground))",
+          expense: "hsl(var(--finance-expense))",
+          "expense-foreground": "hsl(var(--finance-expense-foreground))",
+          info: "hsl(var(--finance-info))",
+          warning: "hsl(var(--finance-warning))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
