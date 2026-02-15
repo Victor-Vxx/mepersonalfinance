@@ -49,6 +49,9 @@
     --sidebar-accent-foreground: 220 15% 90%;
     --sidebar-border: 220 20% 20%;
     --sidebar-ring: 220 70% 55%;
+
+    --nav-active: 145 72% 45%;
+    --nav-active-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -95,6 +98,9 @@
     --sidebar-accent-foreground: 220 15% 90%;
     --sidebar-border: 220 20% 14%;
     --sidebar-ring: 220 70% 55%;
+
+    --nav-active: 145 72% 50%;
+    --nav-active-foreground: 0 0% 100%;
   }
 }
 

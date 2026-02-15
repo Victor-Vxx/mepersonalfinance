@@ -57,6 +57,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        nav: {
+          active: "hsl(var(--nav-active))",
+          "active-foreground": "hsl(var(--nav-active-foreground))",
+        },
         finance: {
           income: "hsl(var(--finance-income))",
           "income-foreground": "hsl(var(--finance-income-foreground))",

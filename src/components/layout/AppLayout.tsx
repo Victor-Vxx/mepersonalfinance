@@ -31,10 +31,10 @@ export default function AppLayout() {
                 key={item.to}
                 to={item.to}
                 end={item.to === '/'}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                activeClassName="bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-all duration-300 ease-in-out hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                activeClassName="bg-nav-active text-nav-active-foreground hover:bg-nav-active hover:text-nav-active-foreground"
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-5 w-5 transition-transform duration-300" />
                 <span>{item.label}</span>
               </NavLink>
             ))}
@@ -61,10 +61,10 @@ export default function AppLayout() {
               key={item.to}
               to={item.to}
               end={item.to === '/'}
-              className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground transition-colors"
-              activeClassName="text-primary"
+              className="flex flex-col items-center gap-0.5 px-3 py-1 text-muted-foreground transition-all duration-300 ease-in-out"
+              activeClassName="text-nav-active scale-110"
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5 transition-transform duration-300" />
               <span className="text-[10px] font-medium">{item.label}</span>
             </NavLink>
           ))}

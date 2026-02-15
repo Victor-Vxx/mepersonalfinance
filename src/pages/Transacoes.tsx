@@ -169,7 +169,7 @@ export default function Transacoes() {
       {isMobile && (
         <button
           onClick={openNewTx}
-          className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform active:scale-95"
+          className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-nav-active text-nav-active-foreground shadow-lg transition-all duration-300 active:scale-95 hover:shadow-xl hover:brightness-110"
         >
           <Plus className="h-6 w-6" />
         </button>
