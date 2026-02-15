@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Category, Transaction, MonthlyGoal, UserProfile } from '@/types/finance';
-import { defaultCategories, defaultTransactions, defaultGoal } from '@/data/mock-data';
+import React, { createContext, useContext, useCallback, useMemo } from 'react';
+import { Category, Transaction, MonthlyGoal, UserProfile, CreditCard } from '@/types/finance';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FinanceContextType {
   transactions: Transaction[];
   categories: Category[];
   goal: MonthlyGoal;
+  cards: CreditCard[];
   profile: UserProfile;
   theme: 'light' | 'dark';
   addTransaction: (tx: Omit<Transaction, 'id'>) => void;
@@ -17,98 +18,92 @@ interface FinanceContextType {
   setGoal: (goal: MonthlyGoal) => void;
   setProfile: (profile: UserProfile) => void;
   setTheme: (theme: 'light' | 'dark') => void;
-  logout: () => void;
+  addCard: (card: Omit<CreditCard, 'id'>) => void;
+  updateCard: (card: CreditCard) => void;
+  deleteCard: (id: string) => void;
+  importCardTransactions: (cardId: string, txs: Omit<Transaction, 'id'>[]) => void;
 }
 
 const FinanceContext = createContext<FinanceContextType | null>(null);
 
-function loadFromStorage<T>(key: string, fallback: T): T {
-  try {
-    const stored = localStorage.getItem(key);
-    return stored ? JSON.parse(stored) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
 export function FinanceProvider({ children }: { children: React.ReactNode }) {
-  const [transactions, setTransactions] = useState<Transaction[]>(() =>
-    loadFromStorage('fin_transactions', defaultTransactions)
-  );
-  const [categories, setCategories] = useState<Category[]>(() =>
-    loadFromStorage('fin_categories', defaultCategories)
-  );
-  const [goal, setGoalState] = useState<MonthlyGoal>(() =>
-    loadFromStorage('fin_goal', defaultGoal)
-  );
-  const [profile, setProfileState] = useState<UserProfile>(() =>
-    loadFromStorage('fin_profile', { name: 'Usuário', email: 'usuario@email.com' })
-  );
-  const [theme, setThemeState] = useState<'light' | 'dark'>(() =>
-    loadFromStorage('fin_theme', 'light')
-  );
+  const { currentUser, updateUser } = useAuth();
 
-  useEffect(() => { localStorage.setItem('fin_transactions', JSON.stringify(transactions)); }, [transactions]);
-  useEffect(() => { localStorage.setItem('fin_categories', JSON.stringify(categories)); }, [categories]);
-  useEffect(() => { localStorage.setItem('fin_goal', JSON.stringify(goal)); }, [goal]);
-  useEffect(() => { localStorage.setItem('fin_profile', JSON.stringify(profile)); }, [profile]);
-  useEffect(() => {
-    localStorage.setItem('fin_theme', JSON.stringify(theme));
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
-
-  // Apply theme on mount
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, []);
+  const transactions = currentUser?.transactions || [];
+  const categories = currentUser?.categories || [];
+  const goal = currentUser?.goal || { month: '', amount: 0 };
+  const cards = currentUser?.cards || [];
+  const theme = currentUser?.theme || 'light';
+  const profile: UserProfile = useMemo(() => ({
+    name: currentUser?.name || '',
+    email: currentUser?.email || '',
+    avatar: currentUser?.avatar,
+  }), [currentUser]);
 
   const addTransaction = useCallback((tx: Omit<Transaction, 'id'>) => {
-    setTransactions(prev => [...prev, { ...tx, id: `tx-${Date.now()}` }]);
-  }, []);
+    updateUser({ transactions: [...transactions, { ...tx, id: `tx-${Date.now()}` }] });
+  }, [transactions, updateUser]);
 
   const updateTransaction = useCallback((tx: Transaction) => {
-    setTransactions(prev => prev.map(t => t.id === tx.id ? tx : t));
-  }, []);
+    updateUser({ transactions: transactions.map(t => t.id === tx.id ? tx : t) });
+  }, [transactions, updateUser]);
 
   const deleteTransaction = useCallback((id: string) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
-  }, []);
+    updateUser({ transactions: transactions.filter(t => t.id !== id) });
+  }, [transactions, updateUser]);
 
   const addCategory = useCallback((cat: Omit<Category, 'id'>) => {
-    setCategories(prev => [...prev, { ...cat, id: `cat-${Date.now()}` }]);
-  }, []);
+    updateUser({ categories: [...categories, { ...cat, id: `cat-${Date.now()}` }] });
+  }, [categories, updateUser]);
 
   const updateCategory = useCallback((cat: Category) => {
-    setCategories(prev => prev.map(c => c.id === cat.id ? cat : c));
-  }, []);
+    updateUser({ categories: categories.map(c => c.id === cat.id ? cat : c) });
+  }, [categories, updateUser]);
 
   const deleteCategory = useCallback((id: string) => {
-    setCategories(prev => prev.filter(c => c.id !== id));
-  }, []);
+    updateUser({ categories: categories.filter(c => c.id !== id) });
+  }, [categories, updateUser]);
 
-  const setGoal = useCallback((g: MonthlyGoal) => setGoalState(g), []);
-  const setProfile = useCallback((p: UserProfile) => setProfileState(p), []);
-  const setTheme = useCallback((t: 'light' | 'dark') => setThemeState(t), []);
+  const setGoal = useCallback((g: MonthlyGoal) => {
+    updateUser({ goal: g });
+  }, [updateUser]);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('fin_transactions');
-    localStorage.removeItem('fin_categories');
-    localStorage.removeItem('fin_goal');
-    localStorage.removeItem('fin_profile');
-    localStorage.removeItem('fin_theme');
-    setTransactions(defaultTransactions);
-    setCategories(defaultCategories);
-    setGoalState(defaultGoal);
-    setProfileState({ name: 'Usuário', email: 'usuario@email.com' });
-    setThemeState('light');
-  }, []);
+  const setProfile = useCallback((p: UserProfile) => {
+    updateUser({ name: p.name, email: p.email, avatar: p.avatar });
+  }, [updateUser]);
+
+  const setTheme = useCallback((t: 'light' | 'dark') => {
+    updateUser({ theme: t });
+    document.documentElement.classList.toggle('dark', t === 'dark');
+  }, [updateUser]);
+
+  const addCard = useCallback((card: Omit<CreditCard, 'id'>) => {
+    updateUser({ cards: [...cards, { ...card, id: `card-${Date.now()}` }] });
+  }, [cards, updateUser]);
+
+  const updateCard = useCallback((card: CreditCard) => {
+    updateUser({ cards: cards.map(c => c.id === card.id ? card : c) });
+  }, [cards, updateUser]);
+
+  const deleteCard = useCallback((id: string) => {
+    updateUser({
+      cards: cards.filter(c => c.id !== id),
+      transactions: transactions.filter(t => t.cardId !== id),
+    });
+  }, [cards, transactions, updateUser]);
+
+  const importCardTransactions = useCallback((cardId: string, txs: Omit<Transaction, 'id'>[]) => {
+    const newTxs = txs.map((tx, i) => ({ ...tx, id: `tx-${Date.now()}-${i}`, cardId }));
+    updateUser({ transactions: [...transactions, ...newTxs] });
+  }, [transactions, updateUser]);
 
   return (
     <FinanceContext.Provider value={{
-      transactions, categories, goal, profile, theme,
+      transactions, categories, goal, cards, profile, theme,
       addTransaction, updateTransaction, deleteTransaction,
       addCategory, updateCategory, deleteCategory,
-      setGoal, setProfile, setTheme, logout,
+      setGoal, setProfile, setTheme,
+      addCard, updateCard, deleteCard, importCardTransactions,
     }}>
       {children}
     </FinanceContext.Provider>
