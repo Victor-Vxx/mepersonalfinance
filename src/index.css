@@ -120,3 +120,8 @@
     @apply rounded-xl border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md;
   }
 }
+
+@keyframes fabMenuIn {
+  0% { opacity: 0; transform: translateX(-50%) scale(0.7); }
+  100% { opacity: 1; transform: translateX(-50%) scale(1); }
+}
